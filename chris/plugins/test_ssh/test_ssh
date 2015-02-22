@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+
+# import the plugin.py superclass
+import os, sys
+sys.path.append( os.path.join(os.path.dirname(__file__), '../') )
+from plugin import Plugin
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../lib'))
+from  _common import crun
+from  _common import systemMisc as misc
+
+
+
+class TestSSH(Plugin):
+  '''
+  '''
+  Plugin.AUTHORS = 'FNNDSC (dev@babyMRI.org)'
+  Plugin.TITLE = 'TestSSH'
+  Plugin.CATEGORY = 'Test'
+  Plugin.DESCRIPTION = 'Test of ssh into DevStack VM'
+  Plugin.DOCUMENTATION = 'http://wiki'
+  Plugin.LICENSE = 'Opensource (MIT)'
+  Plugin.VERSION = '0.1'
+
+  def run(self):
+    options = self.options
+    if options.DIR == None:
+      print 'No input directory provided.'
+      print 'Exiting.'
+      return
+
+    if not os.path.exists(options.DIR):
+      print 'No input directory doesn\'t exist.'
+      print options.DIR
+      print 'Exiting.'
+      return
+
+    cmd = 'ssh travis@192.168.56.201 "ls /home/travis/devstack > /home/travis/tmp/test/test.txt"'
+    cmd += ' && scp travis@192.168.56.201:/home/travis/tmp/test.txt /home/chris/tmp/test/test.txt'
+    cmd += ' && ln -s /home/chris/tmp/test %s' % (options.output)
+    shell = crun.crun()
+    shell.echo(False)
+    shell.waitForChild(True)
+    shell(cmd)
+    str_exitCode = str(shell.exitCode())
+    if str_exitCode != "0":
+      misc.file_writeOnce(os.path.join(self.chrisRunDir, 'ERROR-out.err'), 'Plugin returned error!')
+
+
+# ENTRYPOINT
+if __name__ == "__main__":
+  plugin = TestSSH()
+  plugin.add_parameter('Input', Plugin.STRING, '--dir', action='store', dest='DIR',
+                        help='directory to list')
+  plugin.status = 100 # no cluster job monitoring to mark a feed instantly as done
+  plugin.launch()
+
