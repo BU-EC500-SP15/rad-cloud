@@ -15,7 +15,7 @@ class TestList(Plugin):
   '''
   Plugin.AUTHORS = 'FNNDSC (dev@babyMRI.org)'
   Plugin.TITLE = 'TestList'
-  Plugin.CATEGORY = 'System'
+  Plugin.CATEGORY = 'Test'
   Plugin.DESCRIPTION = 'Test of simple shell commands'
   Plugin.DOCUMENTATION = 'http://wiki'
   Plugin.LICENSE = 'Opensource (MIT)'

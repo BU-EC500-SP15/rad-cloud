@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+
+# import the plugin.py superclass 
+
+# Plugin boots an instance on the devstack VM, passes a command
+# to the new instance, and then deletes the instance. The boot
+# and delete commands are run by exectuing a python script on
+# the devstack VM. The novaclient library has a bug in it which
+# needs to be fixed manually before the boot script will run.
+# Email me for details on what to edit. -Travis
+
+import os, sys
+sys.path.append( os.path.join(os.path.dirname(__file__), '../') )
+from plugin import Plugin
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../lib'))
+from  _common import crun
+from  _common import systemMisc as misc
+
+
+
+class TestBootCmd(Plugin):
+  '''
+  '''
+  Plugin.AUTHORS = 'FNNDSC (dev@babyMRI.org)'
+  Plugin.TITLE = 'TestBootCmd'
+  Plugin.CATEGORY = 'Test'
+  Plugin.DESCRIPTION = 'Test of boot to DevStack VM'
+  Plugin.DOCUMENTATION = 'http://wiki'
+  Plugin.LICENSE = 'Opensource (MIT)'
+  Plugin.VERSION = '0.1'
+
+  def run(self):
+    options = self.options
+    cmd = 'ssh-keygen -f "/home/chris/.ssh/known_hosts" -R 192.168.56.225;'
+    cmd += ' ssh travis@192.168.56.201 "source devstack/openrc.sh && ./scripts/vm_boot.py"'
+    cmd += ' && sshpass -p \'cubswin:)\' ssh -o StrictHostKeyChecking=no cirros@192.168.56.225 "echo "Hello and this is a test." > /home/cirros/test.txt"'
+    cmd += ' && sshpass -p \'cubswin:)\' scp cirros@192.168.56.225:/home/cirros/test.txt /home/chris/tmp/test/test.txt;'
+    cmd += ' ssh travis@192.168.56.201 "source devstack/openrc.sh && ./scripts/vm_delete.py";'
+    cmd += ' ln -s /home/chris/tmp/test %s' % (options.output)
+    shell = crun.crun()
+    shell.echo(False)
+    shell.waitForChild(True)
+    shell(cmd)
+    str_exitCode = str(shell.exitCode())
+    if str_exitCode != "0":
+      misc.file_writeOnce(os.path.join(self.chrisRunDir, 'ERROR-out.err'), 'Plugin returned error!')
+
+
+# ENTRYPOINT
+if __name__ == "__main__":
+  plugin = TestBootCmd()
+  plugin.status = 100 # no cluster job monitoring to mark a feed instantly as done
+  plugin.launch() 
+
