@@ -1,0 +1,23 @@
+cd /home/chris/users/chris/mri_convert/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F; tar -zcf _chrisInput_.tar.gz _chrisInput_;
+
+ssh -i ~/.ssh/radiology-cloud -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 chris@chris-tido "mkdir -p /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F"
+
+scp -i ~/.ssh/radiology-cloud -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P 2222 _chrisInput_.tar.gz chris@chris-tido:/home/chris/users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F/;
+
+rm /home/chris/users/chris/mri_convert/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F/_chrisInput_.tar.gz;
+
+ssh -i ~/.ssh/radiology-cloud -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 chris@chris-tido "cd /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F; tar -zxf _chrisInput_.tar.gz;";
+
+ssh -i ~/.ssh/radiology-cloud -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 chris@chris-tido "cd /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F; rm _chrisInput_.tar.gz;";
+
+ssh -i ~/.ssh/radiology-cloud -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 chris@chris-tido "mkdir -p /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F/_chrisRun_; echo Tue Mar 17 15:18:53 EDT 2015 Running on chris-tido > /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F/_chrisRun_/chris.std;";
+
+ssh -i ~/.ssh/radiology-cloud -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 chris@chris-tido "cd ~; cp chris.env /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F/_chrisRun_/chris.env; source chris.env; export FREESURFER_HOME=\"/home/chris/freesurfer/stable\"; source /home/chris/freesurfer/stable/FreeSurferEnv.sh; /home/chris/src/chrisreloaded/plugins/mri_convert/mri_convert --input /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F/_chrisInput_//home/chris/users/chris/file_browser/2_12_2015_10_38_43-82/0_2015-02-12-10-38-45/data/e3aa755809d5c36fdbd747c8026342c7-978/2012.04.08-011Y-MR_Brain_w__w_o___Angiography_w_o_Contr-1565/AAHScout-AAHScout-20482 --format nii --extensions nii,mgz,dcm,mgh --freesurferscript /home/chris/src/scripts/neuro-fs --output /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F >> /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F/_chrisRun_/chris.std 2> /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F/_chrisRun_/chris.err; chmod 755 /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F";
+
+ssh -i ~/.ssh/radiology-cloud -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 chris@chris-tido "cd /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F ; find . -type d -exec chmod o+rx,g+rx {} \;";
+
+ssh -i ~/.ssh/radiology-cloud -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 chris@chris-tido "cd /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F; find . -type f -exec chmod o+r,g+r {} \;";
+
+ssh -i ~/.ssh/radiology-cloud -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 chris@chris-tido "cd /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F/..; tar -zcf 0_e3aa755809d5c36fdbd747c8026342c7-011Y-F.tar.gz 0_e3aa755809d5c36fdbd747c8026342c7-011Y-F --exclude /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F/_chrisInput_;";
+
+scp -r -i ~/.ssh/radiology-cloud -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P 2222 chris@chris-tido:/home/chris/users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F/../0_e3aa755809d5c36fdbd747c8026342c7-011Y-F.tar.gz /home/chris//users/chris/3_17_2015_15_18_48-91/0_e3aa755809d5c36fdbd747c8026342c7-011Y-F/..;
