@@ -1434,7 +1434,7 @@ class crun_hpc_moc(crun_hpc):
                 str_processCompletedCount)
 
     def killJob(self, jobID=None):
-        cmd_list = super(crun_hpc_launchpad, self)._buildKillCmd('qdel ', jobID)
+        cmd_list = super(crun_hpc_moc, self)._buildKillCmd('qdel ', jobID)
         for cmd in cmd_list:
             self.__call__(cmd)
 
