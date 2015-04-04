@@ -1238,8 +1238,109 @@ class crun_mosixbash(crun):
     def __call__(self, str_cmd):
         return crun.__call__(self, str_cmd)
 
+class crun_hpc_moc(crun_hpc):
+
+    def __init__(self, **kwargs):
+        crun_hpc.__init__(self, **kwargs)
+        
+        self._str_FSdevsource           = '. ~/arch/scripts/nmr-fs dev >/dev/null'
+        self._str_FSstablesource        = '. ~/arch/scripts/nmr-fs stable >/dev/null'
+
+        self._str_clusterName           = "moc"
+        self._str_clusterType           = "torque-based"
+        self._str_clusterScheduler      = 'qsub'
+
+        self._b_emailWhenDone           = False
+
+        self._str_emailUser             = "rudolph"
+	self._str_jobInfoDir		= "~/moc"
+#        if len(self._str_remoteUser):
+#            self._str_jobInfoDir    = "/pbs/%s" % self._str_remoteUser
+#        else:
+#            self._str_jobInfoDir    = "/pbs/%s" % self._str_emailUser
+        self._b_singleQuoteCmd          = True
+        self._str_queue                 = "normal"
+
+        self._priority                  = 50
+        self._str_scheduler             = 'bash'
+        self._str_scheduleCmd           = ''
+        self._str_scheduleArgs          = ''
+
+        #configuration
+        self._b_detach = False
+        self._b_disassociate = False
+        self._b_waitForChild = True
+
+    def __call__(self, str_cmd, **kwargs):
+        self.scheduleArgs()
+        if len(self._str_workingDir):
+            str_cmd = "cd %s ; %s" % (self._str_workingDir, str_cmd)
+        #get job id
+#        str_cmd = str_cmd + ' 2>&1 | tail -n 1 | awk -F \. \'\\\'\'{print $1}\'\\\'\''
+        self._str_scheduleCmd       = self._str_scheduler
+        out = crun.__call__(self, str_cmd, **kwargs)
+        #take stdout from out and process it to get the job id number
+#        self._str_jobID = out[0].strip().split().pop().split('.').pop(0)
+	self._str_jobID = str(randint(1,10000000))
+        self._jobID_list.append(self._str_jobID)
+        return out
+
+    def jobID(self):
+        return self._str_jobID
+    
+    def scheduleArgs(self, *args):
+        if len(args):
+            self._str_scheduleArgs      = args[0]
+        else:
+            self._str_scheduleArgs      = ''
+            self._str_scheduleArgs += "-O %s -E %s " % (
+                self._str_schedulerStdOut, self._str_schedulerStdErr)
+            if self._b_emailWhenDone and len(self._str_emailUser):
+                self._str_scheduleArgs += "-m %s " % self._str_emailUser
+            self._str_scheduleArgs     += "-q %s -c " % self._str_queue
+        return self._str_scheduleArgs
+
+    def queueInfo(self, **kwargs):
+        """
+        Returns a tuple:
+            (number_of_jobs_pending,
+             number_of_jobs_running, 
+             number_of_jobs_scheduled, 
+             number_of_jobs_completed)
+        """
+        if self._b_sshDo and len(self._str_remoteHost):
+            shellQueue  = crun( remoteHost=self._str_remoteHost,
+                                remotePort=self._str_remotePort,
+                                remoteUser=self._str_remoteUser,
+                                remoteUserIdentity = self._str_remoteUserIdentity)
+            str_user    = self._str_remoteUser
+        else:
+            shellQueue  = crun()
+            str_user    = crun('whoami').stdout().strip()
+        shellQueue('qstat | grep %s | wc -l ' % str_user)
+        str_processInSchedulerCount     = shellQueue.stdout().strip()
+        shellQueue("qstat | grep %s | awk '{print $5}' | grep 'C' | wc -l" %\
+                    str_user)
+        str_processCompletedCount       = shellQueue.stdout().strip()
+        shellQueue("qstat | grep %s | awk '{print $5}' | grep 'R' | wc -l" %\
+                    str_user)
+        str_processRunningCount         = shellQueue.stdout().strip()
+        shellQueue("qstat | grep %s | awk '{print $5}' | grep 'Q' | wc -l" %\
+                    str_user)
+        str_processPendingCount         = shellQueue.stdout().strip()
+        return (str_processPendingCount,
+                str_processRunningCount, 
+                str_processInSchedulerCount,
+                str_processCompletedCount)
+
+    def killJob(self, jobID=None):
+        cmd_list = super(crun_hpc_moc, self)._buildKillCmd('qdel ', jobID)
+        for cmd in cmd_list:
+            self.__call__(cmd)
 
 if __name__ == '__main__':
+
+    os.system("echo " + str(sys.argv[1:]) + " > /home/chris/temp.txt")
 
     parser = argparse.ArgumentParser(description="crun is functor family of scripts for running \
                                      command line apps on a cluster.")
@@ -1333,110 +1434,13 @@ if __name__ == '__main__':
        sys.exit("error: either a --kill jobID or a -c COMMAND option must be passed") 
     else:
         str_cmd = args.command
+        os.system("echo " + str_cmd + " >> /home/chris/temp.txt")
         shell(str_cmd)
         if args.saveJobID:
             shell.saveScheduledJobIDs(args.saveJobID) 
     #print shell.stdout()
     if args.printElapsedTime: print("Elapsed time = %f seconds" % misc.toc())
-    
 
-class crun_hpc_moc(crun_hpc):
-
-    def __init__(self, **kwargs):
-        crun_hpc.__init__(self, **kwargs)
-        
-        self._str_FSdevsource           = '. ~/arch/scripts/nmr-fs dev >/dev/null'
-        self._str_FSstablesource        = '. ~/arch/scripts/nmr-fs stable >/dev/null'
-
-        self._str_clusterName           = "moc"
-        self._str_clusterType           = "torque-based"
-        self._str_clusterScheduler      = 'qsub'
-
-        self._b_emailWhenDone           = False
-
-        self._str_emailUser             = "rudolph"
-        if len(self._str_remoteUser):
-            self._str_jobInfoDir    = "/pbs/%s" % self._str_remoteUser
-        else:
-            self._str_jobInfoDir    = "/pbs/%s" % self._str_emailUser
-        self._b_singleQuoteCmd          = True
-        self._str_queue                 = "normal"
-
-        self._priority                  = 50
-        self._str_scheduler             = 'bash'
-        self._str_scheduleCmd           = ''
-        self._str_scheduleArgs          = ''
-
-        #configuration
-        self._b_detach = False
-        self._b_disassociate = False
-        self._b_waitForChild = True
-
-    def __call__(self, str_cmd, **kwargs):
-        self.scheduleArgs()
-        if len(self._str_workingDir):
-            str_cmd = "cd %s ; %s" % (self._str_workingDir, str_cmd)
-        #get job id
-        str_cmd = str_cmd + ' 2>&1 | tail -n 1 | awk -F \. \'\\\'\'{print $1}\'\\\'\''
-        self._str_scheduleCmd       = self._str_scheduler
-        out = crun.__call__(self, str_cmd, **kwargs)
-        #take stdout from out and process it to get the job id number
-        self._str_jobID = out[0].strip().split().pop().split('.').pop(0)
-        self._jobID_list.append(self._str_jobID)
-        return out
-
-    def jobID(self):
-        return self._str_jobID
-    
-    def scheduleArgs(self, *args):
-        if len(args):
-            self._str_scheduleArgs      = args[0]
-        else:
-            self._str_scheduleArgs      = ''
-            self._str_scheduleArgs += "-O %s -E %s " % (
-                self._str_schedulerStdOut, self._str_schedulerStdErr)
-            if self._b_emailWhenDone and len(self._str_emailUser):
-                self._str_scheduleArgs += "-m %s " % self._str_emailUser
-            self._str_scheduleArgs     += "-q %s -c " % self._str_queue
-        return self._str_scheduleArgs
-
-    def queueInfo(self, **kwargs):
-        """
-        Returns a tuple:
-            (number_of_jobs_pending,
-             number_of_jobs_running, 
-             number_of_jobs_scheduled, 
-             number_of_jobs_completed)
-        """
-        if self._b_sshDo and len(self._str_remoteHost):
-            shellQueue  = crun( remoteHost=self._str_remoteHost,
-                                remotePort=self._str_remotePort,
-                                remoteUser=self._str_remoteUser,
-                                remoteUserIdentity = self._str_remoteUserIdentity)
-            str_user    = self._str_remoteUser
-        else:
-            shellQueue  = crun()
-            str_user    = crun('whoami').stdout().strip()
-        shellQueue('qstat | grep %s | wc -l ' % str_user)
-        str_processInSchedulerCount     = shellQueue.stdout().strip()
-        shellQueue("qstat | grep %s | awk '{print $5}' | grep 'C' | wc -l" %\
-                    str_user)
-        str_processCompletedCount       = shellQueue.stdout().strip()
-        shellQueue("qstat | grep %s | awk '{print $5}' | grep 'R' | wc -l" %\
-                    str_user)
-        str_processRunningCount         = shellQueue.stdout().strip()
-        shellQueue("qstat | grep %s | awk '{print $5}' | grep 'Q' | wc -l" %\
-                    str_user)
-        str_processPendingCount         = shellQueue.stdout().strip()
-        return (str_processPendingCount,
-                str_processRunningCount, 
-                str_processInSchedulerCount,
-                str_processCompletedCount)
-
-    def killJob(self, jobID=None):
-        cmd_list = super(crun_hpc_moc, self)._buildKillCmd('qdel ', jobID)
-        for cmd in cmd_list:
-            self.__call__(cmd)
 
     
     
