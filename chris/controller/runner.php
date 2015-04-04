@@ -282,8 +282,11 @@ class RemoteRunner extends Runner{
 
     $crunWrap = joinPaths(CLUSTER_CHRIS, CHRIS_SRC, 'lib/_common/crun.py');
     $crunWrap = $crunWrap . ' -u ' . $this->username . ' --host ' . $tunnel_host . ' -s ' . CLUSTER_TYPE . ' --saveJobID ' . $this->runtimePath . '/_chrisRun_';
-    $cmd = 'nohup /bin/bash -c " source ' . $envfile . ' && ' . $crunWrap . ' -c \'\\\'\' /bin/bash ' . $runfile . ' \'\\\'\' "  </dev/null &>/dev/null &';
+    //$cmd = 'nohup /bin/bash -c " source ' . $envfile . ' && ' . $crunWrap . ' -c \'\\\'\' /bin/bash ' . $runfile . ' \'\\\'\' "  </dev/null &>/dev/null &';
+    $cmd = 'nohup /bin/bash -c " source ' . $envfile . ' && '. $runfile . ' \'\' "  </dev/null &>/dev/null &';
+    $echoCmd = 'echo \''.$cmd.'\'  > /home/chris/test.txt';
     $pid = $this->remoteSsh->exec(bash($cmd));
+    //$pid = $this->remoteSsh->exec($echoCmd);
   }
 }
 
@@ -359,13 +362,13 @@ class SeparatedRunner extends RemoteRunner{
 
     // command to compress _chrisInput_ dir on the chris server
     $cmd = '\"cd '.$this->path.'; tar -zcf _chrisInput_.tar.gz _chrisInput_;\"';
-    $cmd = 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P ' .CLUSTER_PORT. ' -o StrictHostKeyChecking=no ' . $this->username.'@'.$tunnel_host. ' '.$cmd;
+    $cmd = 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p ' .CLUSTER_PORT. ' -o StrictHostKeyChecking=no ' . $this->username.'@'.$tunnel_host. ' '.$cmd;
 
     // command to copy over the compressed _chrisIput_ dir to the cluster
     $cmd = $cmd.PHP_EOL.'scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P ' .CLUSTER_PORT. ' ' . $this->username.'@'.$tunnel_host.':'.$this->path.'/_chrisInput_.tar.gz ' .$this->runtimePath.';';
 
     // command to remove the compressed file on the chris server
-    $cmd = $cmd.PHP_EOL.'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -P ' .CLUSTER_PORT. ' ' . $this->username.'@'.$tunnel_host . ' rm '.$this->path.'/_chrisInput_.tar.gz;';
+    $cmd = $cmd.PHP_EOL.'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p ' .CLUSTER_PORT. ' ' . $this->username.'@'.$tunnel_host . ' rm '.$this->path.'/_chrisInput_.tar.gz;';
 
     // command to uncompress the compressed file on the cluster
     $cmd = $cmd.PHP_EOL.'cd '.$this->runtimePath.'; tar -zxf _chrisInput_.tar.gz;';
@@ -448,7 +451,7 @@ class SeparatedRunner extends RemoteRunner{
     // DELETE REMOTE JOB PATH AFTER ALL THE DATA AS BEEN COPIED BACK
     /////
     // DO IF AFTER, if not can not test separated FS on shared FS
-    $cmd = 'rm -rf '.$this->runtimePath.' &;';
+    $cmd = 'rm -rf '.$this->runtimePath.' &';
     $runfile_str = $runfile_str.PHP_EOL.$cmd;
 
     $this->ssh->exec('echo "'.$runfile_str.'"'.' > '.$runfile);
