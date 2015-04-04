@@ -15,9 +15,9 @@ def get_nova_creds():
 
 creds = get_nova_creds()
 nova = nvclient.Client(**creds)
-image = nova.images.find(name="cirros-0.3.2-x86_64-uec")
-flavor = nova.flavors.find(name="m1.micro")
-security_group = [nova.security_groups.find(name="SECURITY_TEST")]
+image = nova.images.find(name="Cirros-0.3.3-x86_64")
+flavor = nova.flavors.find(name="m1.small")
+security_group = ['SECURITY_TEST']
 instance = nova.servers.create(name="test", image=image, flavor=flavor
    ,security_groups=security_group)
 
