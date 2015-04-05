@@ -5,6 +5,9 @@ import os
 class Worker(object):
 
 	def __init__(self, host):
+        self._credentials = pika.PlainCredentials('chris', 'chris1234')
+        self._connection = pika.BlockingConnection(pika.ConnectionParameters(
+                 host='chris-master', virtual_host='master', credentials=self._credentials))
 		self._connection = pika.BlockingConnection(pika.ConnectionParameters(
 	'localhost'))
 		self._channel = self._connection.channel()
