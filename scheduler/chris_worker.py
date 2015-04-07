@@ -27,10 +27,11 @@ class Worker(object):
 	def callback(self, ch, method, properties, body):
 		remote = body + '/__chrisRun__'
 		runfile = remote + '/chris.run'
+		envfile = remote + '/chris.env'
 		local = body
 		os.system('mkdir -p %s' % (local))
 		os.system('scp -rp %s:%s %s' % (self._master, remote, local))
-		os.system(runfile)
+		os.system('source ' + envfile + '; ' + runfile)
 
 if __name__ == '__main__':
 	worker = Worker('localhost')

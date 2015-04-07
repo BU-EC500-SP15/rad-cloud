@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import pika
+import sys
 
 class Scheduler(object):
 	def __init__(self, host):
@@ -22,5 +23,8 @@ class Scheduler(object):
 
 if __name__ == '__main__':
 	scheduler = Scheduler('localhost')
-	scheduler.send('/Users/kristi/test/')
+
+	data = sys.args[1]
+
+	scheduler.send(data)
 	scheduler.close()
