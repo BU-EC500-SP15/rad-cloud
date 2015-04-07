@@ -5,7 +5,7 @@ class Scheduler(object):
 	def __init__(self, host):
         self._credentials = pika.PlainCredentials('chris', 'chris1234')
 	    self._connection = pika.BlockingConnection(pika.ConnectionParameters(
-        #       host=host, virtual_host='master', credentials=self._credentials))
+	    	host=host, virtual_host='master', credentials=self._credentials))
 	    #self._connection = pika.BlockingConnection(
 		#	pika.ConnectionParameters(
 		#		host))
