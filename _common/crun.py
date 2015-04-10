@@ -31,17 +31,22 @@ class crun(object):
     """
         This family of functor classes provides a unified interface
         to running shell-commands in several contexts:
+
             - locally on the underlying OS
             - remote host via ssh
             - remote cluster via scheduler
+
         If the baseclass is "run", no cluster scheduling is performed
         and a straightforward remote exec via ssh is executed.
+
         If a scheduler subclass is "run", the shell command is scheduled
         and executed on the cluster.
+
         If the parent caller does not need to explicitly wait on the child,
         the crun.detach() method will decouple the child completely. The
         parent would then need some child- or operation-specific
         mechanism to determine if the child has finished executing.
+
         By default, the child will not detach and the parent will wait/block
         on the call.
     """
@@ -104,10 +109,13 @@ class crun(object):
     def FSinit(self, **kwargs):
         '''
         Get / set the FS related initialization parameters.
+
         Returns a dictionary of internal values if called as
         as getter. This allows for one crun object to be FSinit'd
         by another:
+
             crun1.FSinit(**crun2.FSinit())
+
         will assign <crun1> the FS internals of <crun2>. This assumes,
         obviously, that <crun2> has been initializes already with
         appropriate values  FS values.
@@ -153,6 +161,7 @@ class crun(object):
         This assumes that astr_cmd is fully qualified, i.e.
         if a scheduler prefix is required, this should already
         have been generated.
+
         <astr_cmd> is essentially the command just before
         a non-FS shell would have executed it.
         '''
@@ -262,6 +271,7 @@ class crun(object):
     def __call__(self, str_cmd, **kwargs):
         '''
         This "functor" is the heart of the crun object.
+
         The order of the following statements is critical in building up the
         correct final command string to be executed, especially as far as
         the correct quoting of the correct sub-part, the placement (or not)
@@ -323,6 +333,7 @@ class crun(object):
         if self._b_echoCmd: sys.stdout.write('%s\n' % self._str_shellCmd)
         if self._b_runCmd:
             kwargs['waitForChild'] = self._b_waitForChild
+            print self._str_shellCmd
             self._str_stdout, self._str_stderr, self._exitCode    = \
                     misc.shell(self._str_shellCmd, **kwargs)
         if self._b_echoStdOut:
@@ -456,6 +467,7 @@ class crun_hpc(crun):
     data elements and methods common to high performance clusters.
     Specific cluster types derive from this class and typically
     override the following:
+
     crun_hpc.scheduleArgs(...)
     crun_hpc.queueInfo(...)
     '''
@@ -1139,17 +1151,25 @@ class crun_hpc_mosix(crun_hpc):
         str_desc        = ''
         if len(self._str_desc):
             str_desc    = '''
+
         This batch of jobs has the following internal description:
+
         <--%s-->
+
         ''' % self._str_desc
         str_body        = """
         Dear %s --
+
         The scheduled batch of jobs you sent to PICES have
         all completed, and no jobs remain in the scheduler.
+
         %s
+
         Please consult any relevant output files relating
         to your job.
+
         <EOM/NRN>
+
         """ % (self.emailUser(), str_desc)
         CMail.mstr_SMTPserver = "johannesburg"
         CMail.send(     to      = self.emailUser().split(','),
@@ -1272,11 +1292,11 @@ class crun_hpc_moc(crun_hpc):
             self._str_jobInfoDir    = "/pbs/%s" % self._str_remoteUser
         else:
             self._str_jobInfoDir    = "/pbs/%s" % self._str_emailUser
-        self._b_singleQuoteCmd          = False
+        self._b_singleQuoteCmd          = True
         self._str_queue                 = "max200"
 
         self._priority                  = 50
-        self._str_scheduler             = ''
+        self._str_scheduler             = '/home/chris/src/rabbitmq/chris_scheduler'
         self._str_scheduleCmd           = ''
         self._str_scheduleArgs          = ''
 
@@ -1287,7 +1307,6 @@ class crun_hpc_moc(crun_hpc):
 
     def __call__(self, str_cmd, **kwargs):
         self.scheduleArgs()
-        print str_cmd
         if len(self._str_workingDir):
             str_cmd = "cd %s ; %s" % (self._str_workingDir, str_cmd)
         self._str_scheduleCmd       = self._str_scheduler
@@ -1299,7 +1318,10 @@ class crun_hpc_moc(crun_hpc):
         return self._str_jobID
 
     def scheduleArgs(self, *args):
-        return ""
+        self._str_scheduleArgs = ''
+        self._str_scheduleArgs += " -r %s -u %s -f %s -c " % (
+               self._str_remoteHost, self._str_remoteUser, self._str_schedulerStdOutDir)
+        return self._str_scheduleArgs
 
     def queueInfo(self, **kwargs):
         return ""
@@ -1377,7 +1399,7 @@ if __name__ == '__main__':
             sys.exit("error: wrong cluster scheduler type input. Please run with the -h option to see posible values")
     elif args.user:
         shell = crun(remoteUser=user, remoteHost=host, emailUser=mail, schedulerStdOutDir=out, schedulerStdErrDir=err)
-        shell.echo(False)
+        shell.echo(True)
         shell.echoStdOut(True)
         shell.waitForChild(True)
     else:
@@ -1410,3 +1432,8 @@ if __name__ == '__main__':
             shell.saveScheduledJobIDs(args.saveJobID)
     #print shell.stdout()
     if args.printElapsedTime: print("Elapsed time = %f seconds" % misc.toc())
+
+
+
+
+
