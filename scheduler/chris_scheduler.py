@@ -14,23 +14,25 @@ class Scheduler(object):
         	host=host, virtual_host='master', credentials=self._credentials))
         #self._connection = pika.BlockingConnection(pika.ConnectionParameters(host))
         self._channel = self._connection.channel()
-        self._channel.queue_declare(queue='hello')
+        self._channel.queue_declare(queue='tasks', durable=True)
 
     def close(self):
         self._connection.close()
     
     def send(self, command):
-        self._channel.basic_publish(exchange = '',
-        routing_key = 'hello',
-        body = command)
+        self._channel.basic_publish(
+            exchange = '',
+            routing_key = 'tasks',
+            body = command, 
+            properties=pika.BasicProperties(
+                delivery_mode = 2))
 
     def readFile(self, filename):
         f = open(filename, 'r')
-	command = f.read()
-	return command
+        command = f.read()
+        return command
 
     def addPrefix(self, command):
-
         cmdPrefix = "echo 'Task Received'; " + \
                 'mkdir -p ' + self._chrisrunDir + '; ' + \
                 'scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ' + self._remoteUser + '@' + self._remoteHost + ':' + \

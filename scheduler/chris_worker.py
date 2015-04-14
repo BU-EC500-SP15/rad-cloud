@@ -13,10 +13,8 @@ class Worker(object):
 		#	pika.ConnectionParameters(
 		#		host))
 		self._channel = self._connection.channel()
-		self._channel.queue_declare(queue='hello')
-		self._channel.basic_consume(self.callback,
-			queue = 'hello',
-			no_ack = True)
+		self._channel.queue_declare(queue='tasks', durable=True)
+		self._channel.basic_consume(self.callback, queue = 'tasks')
 
 	def start(self):
 		self._channel.start_consuming()
@@ -32,6 +30,7 @@ class Worker(object):
 		os.system('mkdir -p %s' % (local))
 		os.system('scp -rp %s:%s %s' % (self._master, remote, local))
 		os.system('source ' + envfile + '; ' + runfile)
+		self._channel.basic_ack(delivery_tag = method.delivery_tag)
 
 if __name__ == '__main__':
 	worker = Worker('localhost')
