@@ -47,28 +47,28 @@ class Scheduler(object):
             "echo 'export ENV_CLUSTERTYPE=crun' >> " + self._chrisrunDir + '/chris.env; ' + \
             'scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ' + self._remoteUser + '@' + self._remoteHost + ':' + \
             self._chrisrunDir + '/chris.run ' + self._chrisrunDir + ' && ' + \
-		"echo 'Task Completed'; "
+            "echo 'Task Completed'; "
         command = cmdPrefix + ' ' + command
         return command
 
 
 if __name__ == '__main__':
-	parser = argparse.ArgumentParser()
-	parser.add_argument("-f", "--filepath", help="location of source file")
-	parser.add_argument("-r", "--remotehost", help="remote host name")
-	parser.add_argument("-u", "--remoteuser", help="remote username")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--filepath", help="location of source file")
+    parser.add_argument("-r", "--remotehost", help="remote host name")
+    parser.add_argument("-u", "--remoteuser", help="remote username")
 
-	exclusive_options = parser.add_mutually_exclusive_group()
-	exclusive_options.add_argument("-c", "--command", help="command to be executed")
+    exclusive_options = parser.add_mutually_exclusive_group()
+    exclusive_options.add_argument("-c", "--command", help="command to be executed")
 
-	args = parser.parse_args()
+    args = parser.parse_args()
 
-	if not args.command:
+    if not args.command:
 	   sys.exit("error: missing command option")
 
-	scheduler = Scheduler('localhost', args.remotehost, args.remoteuser, args.filepath)
+    scheduler = Scheduler('localhost', args.remotehost, args.remoteuser, args.filepath)
 
-	data = scheduler.addPrefix(args.command)
+    data = scheduler.addPrefix(args.command)
 
 	scheduler.send(data)
 	scheduler.close()
