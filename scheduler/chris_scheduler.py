@@ -64,11 +64,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if not args.command:
-	   sys.exit("error: missing command option")
+        sys.exit("error: missing command option")
 
     scheduler = Scheduler('localhost', args.remotehost, args.remoteuser, args.filepath)
 
     data = scheduler.addPrefix(args.command)
 
-	scheduler.send(data)
-	scheduler.close()
+    scheduler.send(data)
+    scheduler.close()
