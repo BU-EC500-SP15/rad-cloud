@@ -47,7 +47,7 @@ class Scheduler(object):
             "echo 'export ENV_CLUSTERTYPE=crun' >> " + self._chrisrunDir + '/chris.env; ' + \
             'scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ' + self._remoteUser + '@' + self._remoteHost + ':' + \
             self._chrisrunDir + '/chris.run ' + self._chrisrunDir + ' && ' + \
-            "echo 'Task Completed'; "
+            "echo 'Executing Task...'; "
         command = cmdPrefix + ' ' + command
         return command
 

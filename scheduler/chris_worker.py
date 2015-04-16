@@ -15,6 +15,7 @@ class Worker(object):
 
         self._channel = self._connection.channel()
         self._channel.queue_declare(queue='tasks', durable=True)
+        self._channel.basic_qos(prefetch_count=1)
         self._channel.basic_consume(self.callback, queue='tasks')
 
     def start(self):
@@ -24,13 +25,7 @@ class Worker(object):
         self._connection.close()
 
     def callback(self, ch, method, properties, body):
-        remote = body + '/__chrisRun__'
-        runfile = remote + '/chris.run'
-        envfile = remote + '/chris.env'
-        local = body
-        os.system('mkdir -p %s' % local)
-        os.system('scp -rp %s:%s %s' % (self._master, remote, local))
-        os.system('source ' + envfile + '; ' + runfile)
+        os.system(body)
         self._channel.basic_ack(delivery_tag=method.delivery_tag)
 
 

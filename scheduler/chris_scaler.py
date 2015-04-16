@@ -8,7 +8,7 @@ class Scaler(object):
 		self._floor = floor
 		self._min_workers = min_workers
 		self._credentials = pika.PlainCredentials('chris', 'chris1234')
-		elf._connection = pika.BlockingConnection(pika.ConnectionParameters(
+		self._connection = pika.BlockingConnection(pika.ConnectionParameters(
 	    	host=host, virtual_host='master', credentials=self._credentials))
 		#self._connection = pika.BlockingConnection(
 	    #	pika.ConnectionParameters(
@@ -20,9 +20,10 @@ class Scaler(object):
 
 	def monitor(self):
 		while (True):
-			monitor = self._channel.queue_declare(queue='hello', passive=True).method
+			monitor = self._channel.queue_declare(queue='tasks', passive=True).method
 			messages = monitor.message_count
 			workers = monitor.consumer_count
+            min_workers = 1
 
 			if messages >= workers * self._ceiling:
 				print("Scale up!")
