@@ -3,7 +3,7 @@
 
 import os
 import time
-import novaclient.v1_1.client as nvclient
+import novaclient.v2.client as nvclient
 
 from credentials import get_nova_creds
 
