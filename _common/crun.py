@@ -333,7 +333,6 @@ class crun(object):
         if self._b_echoCmd: sys.stdout.write('%s\n' % self._str_shellCmd)
         if self._b_runCmd:
             kwargs['waitForChild'] = self._b_waitForChild
-            print self._str_shellCmd
             self._str_stdout, self._str_stderr, self._exitCode    = \
                     misc.shell(self._str_shellCmd, **kwargs)
         if self._b_echoStdOut:
@@ -1296,7 +1295,7 @@ class crun_hpc_moc(crun_hpc):
         self._str_queue                 = "max200"
 
         self._priority                  = 50
-        self._str_scheduler             = '/home/chris/src/rabbitmq/chris_scheduler'
+        self._str_scheduler             = '/home/chris/src/rabbitmq/chris_scheduler.py'
         self._str_scheduleCmd           = ''
         self._str_scheduleArgs          = ''
 
@@ -1311,7 +1310,6 @@ class crun_hpc_moc(crun_hpc):
             str_cmd = "cd %s ; %s" % (self._str_workingDir, str_cmd)
         self._str_scheduleCmd       = self._str_scheduler
         out = crun.__call__(self, str_cmd, **kwargs)
-        print out
         return out
 
     def jobID(self):
@@ -1430,7 +1428,6 @@ if __name__ == '__main__':
         if args.blockOnChild: shell.blockOnChild()
         if args.saveJobID:
             shell.saveScheduledJobIDs(args.saveJobID)
-    #print shell.stdout()
     if args.printElapsedTime: print("Elapsed time = %f seconds" % misc.toc())
 
 
