@@ -19,13 +19,12 @@ def main():
     volume_snapshot_id = config.get('Openstack', 'volume-snapshot-id')
     network_name = config.get('Openstack', 'network')
 
-    #image = nova.images.find(name="chris-compute-snapshot-new")
     flavor = nova.flavors.find(name=flavor_name)
     vlsnapshot = nova.volume_snapshots.find(id=volume_snapshot_id)
-    volume = nova.volumes.create(40, snapshot_id=vlsnapshot.id) #, display_name="master-created-volume")
+    volume = nova.volumes.create(40, snapshot_id=vlsnapshot.id)
     time.sleep(10)
     block_dev_mapping = {'vda': volume.id}
-    instance = nova.servers.create(name="test", image=None, flavor=flavor, block_device_mapping=block_dev_mapping)
+    instance = nova.servers.create(name="chris-worker", image=None, flavor=flavor, block_device_mapping=block_dev_mapping)
 
     status = instance.status
     while status == 'BUILD':

@@ -15,7 +15,6 @@ class Scheduler(object):
         self._credentials = pika.PlainCredentials('chris', 'chris1234')
         self._connection = pika.BlockingConnection(pika.ConnectionParameters(
                 host=host, virtual_host='master', credentials=self._credentials))
-        #self._connection = pika.BlockingConnection(pika.ConnectionParameters(host))
         self._channel = self._connection.channel()
         self._channel.queue_declare(queue='tasks', durable=True)
 
@@ -34,12 +33,6 @@ class Scheduler(object):
                 delivery_mode = 2))
 
 
-    def readFile(self, filename):
-        f = open(filename, 'r')
-        command = f.read()
-        return command
-
-
     def addTaskPrefix(self, command):
         cmdPrefix = "-c,"
         cmdPrefix += "echo 'Task Received'; " + \
@@ -49,7 +42,8 @@ class Scheduler(object):
             "echo 'export ENV_CLUSTERTYPE=crun' >> " + self._filePath + '/chris.env; ' + \
             'scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ' + self._remoteUser + '@' + self._remoteHost + ':' + \
             self._filePath + '/chris.run ' + self._filePath + ' && ' + \
-            "echo 'Executing Task...'; "
+            'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ' + self._remoteUser + '@' + self._remoteHost + \
+            ' \"rm -r ' + self._filePath + '\" && ' + "echo 'Executing Task...'; "
         command = cmdPrefix + ' ' + command
         return command
 
