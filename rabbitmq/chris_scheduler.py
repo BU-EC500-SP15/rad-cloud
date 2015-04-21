@@ -34,6 +34,12 @@ class Scheduler(object):
 
 
     def addTaskPrefix(self, command):
+        basePath = self._filePath.split('/')
+        basePath.pop()
+        basePath.pop()
+        fslash = '/'
+        basePath = fslash.join(basePath)
+
         cmdPrefix = "-c,"
         cmdPrefix += "echo 'Task Received'; " + \
             'mkdir -p ' + self._filePath + '; ' + \
@@ -43,7 +49,7 @@ class Scheduler(object):
             'scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ' + self._remoteUser + '@' + self._remoteHost + ':' + \
             self._filePath + '/chris.run ' + self._filePath + ' && ' + \
             'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ' + self._remoteUser + '@' + self._remoteHost + \
-            ' \"rm -r ' + self._filePath + '\" && ' + "echo 'Executing Task...'; "
+            ' \"rm -r ' + basePath + '\" && ' + "echo 'Executing Task...'; "
         command = cmdPrefix + ' ' + command
         return command
 

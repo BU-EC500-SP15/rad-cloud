@@ -2,6 +2,7 @@
 import os
 import pika
 import time
+import ConfigParser
 
 class Scaler(object):
     def __init__(self, host, ceiling, floor, scale_by, min_workers):
@@ -42,5 +43,13 @@ class Scaler(object):
 
 
 if __name__ == '__main__':
-        scaler = Scaler('localhost', 0.75, 0.3, 0.5, 1)
-        scaler.monitor()
+    config = ConfigParser.RawConfigParser()
+    config.read('/home/chris/src/rabbitmq/chris-moc.cfg')
+
+    min_workers = config.getint('Scaling', 'min_workers')
+    ceil_threshold = config.getfloat('Scaling', 'ceil_threshold')
+    floor_threshold = config.getfloat('Scaling', 'floor_threshold')
+    scale_by = config.getfloat('Scaling', 'scale_by')
+
+    scaler = Scaler('localhost', ceil_threshold, floor_threshold, scale_by, min_workers)
+    scaler.monitor()
