@@ -1,6 +1,8 @@
 Final Presentation Instructions
 ===============================
 
+**Link to Final Presentation Video:** https://youtu.be/df4jxuNY-8o
+
 Running Jobs on ChRIS Dashboard
 -------------------------------
 
